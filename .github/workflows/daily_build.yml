@@ -1,0 +1,57 @@
+name: Daily Flutter Build
+
+on:
+  schedule:
+    # 10:00 AM IST = 4:30 AM UTC
+    - cron: '30 4 * * *'
+
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+
+      - name: Checkout Project
+        uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: 3.24.3
+
+      - name: Get Packages
+        run: flutter pub get
+
+      - name: Build CUG APK
+        run: |
+          flutter build apk \
+          --flavor cug \
+          --release \
+          -t lib/main_cug.dart
+
+      - name: Build UAT APK
+        run: |
+          flutter build apk \
+          --flavor uat \
+          --release \
+          -t lib/main_uat.dart
+
+      - name: Create Zip
+        run: |
+          mkdir apks
+          cp build/app/outputs/flutter-apk/*.apk apks/
+          zip -r Daily_APKs.zip apks
+
+      - name: Upload Zip
+        uses: actions/upload-artifact@v4
+        with:
+          name: Daily_APKs
+          path: Daily_APKs.zip
