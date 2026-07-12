@@ -1,3 +1,7 @@
+plugins {
+	id "org.jetbrains.kotlin.android" version "1.8.22"
+}
+
 include ':app'
 
 def localPropertiesFile = new File(rootProject.projectDir, "local.properties")
